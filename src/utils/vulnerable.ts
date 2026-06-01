@@ -152,7 +152,7 @@ const DATABASE_CONFIG = {
 };
 
 const API_KEYS: Record<string, string> = {
-  stripe: 'sk_live_51AbCdEfGhIjKlMnOpQrStUvWxYz',
+  stripe: 'SECRET',
   sendgrid: 'SG.xxxxxxxxxxxxxxxxxxxx',
   twilio: 'ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
   googleMaps: 'AIzaSyxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
