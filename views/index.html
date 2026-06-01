@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Vulnerable App</title>
+  <!-- 
+    VULNERABILITY: Loading scripts from untrusted CDN without SRI
+    CWE-829: Inclusion of Functionality from Untrusted Control Sphere
+  -->
+  <script src="http://cdn.example.com/jquery.js"></script>
+  <script src="http://cdn.example.com/bootstrap.js"></script>
+</head>
+<body>
+
+<!--
+  VULNERABILITY: No CSRF token on forms
+  CWE-352: Cross-Site Request Forgery
+-->
+<form action="/auth/login" method="POST" id="loginForm">
+  <input type="text" name="username" placeholder="Username" />
+  <input type="password" name="password" placeholder="Password" />
+  <!-- No CSRF token -->
+  <button type="submit">Login</button>
+</form>
+
+<!--
+  VULNERABILITY: DOM-based XSS via innerHTML
+  CWE-79: DOM XSS
+-->
+<div id="output"></div>
+<div id="userProfile"></div>
+<div id="searchResults"></div>
+
+<script>
+  // VULNERABILITY: DOM XSS via location.hash
+  document.getElementById('output').innerHTML = location.hash.substring(1);
+
+  // VULNERABILITY: DOM XSS via URL parameter
+  const urlParams = new URLSearchParams(window.location.search);
+  const name = urlParams.get('name');
+  document.getElementById('userProfile').innerHTML = '<h1>Hello ' + name + '</h1>';
+
+  // VULNERABILITY: DOM XSS via document.write
+  const searchQuery = urlParams.get('q');
+  document.write('<p>Search results for: ' + searchQuery + '</p>');
+
+  // VULNERABILITY: Storing sensitive data in localStorage
+  // CWE-312: Cleartext Storage of Sensitive Information
+  function saveUserData(token, password) {
+    localStorage.setItem('authToken', token);
+    localStorage.setItem('userPassword', password); // Password in localStorage!
+    localStorage.setItem('sessionId', token);
+  }
+
+  // VULNERABILITY: Sending credentials in URL
+  // CWE-598: Sensitive Data in GET Request
+  function login(username, password) {
+    window.location.href = '/auth/login?username=' + username + '&password=' + password;
+  }
+
+  // VULNERABILITY: Eval of server response
+  // CWE-95: Eval Injection
+  function handleApiResponse(responseText) {
+    eval(responseText); // eval of server response
+  }
+
+  // VULNERABILITY: JSONP with user-controlled callback
+  // CWE-79: JSONP XSS
+  function loadUserData(userId, callback) {
+    const script = document.createElement('script');
+    script.src = '/api/user/' + userId + '?callback=' + callback;
+    document.head.appendChild(script);
+  }
+
+  // VULNERABILITY: postMessage without origin validation
+  // CWE-346: Origin Validation Error
+  window.addEventListener('message', function(event) {
+    // No origin check
+    document.getElementById('output').innerHTML = event.data; // XSS via postMessage
+    eval(event.data.code); // Code execution via postMessage
+  });
+
+  // VULNERABILITY: Reflected XSS via error message display
+  function showError(message) {
+    document.getElementById('output').innerHTML = 'Error: ' + message;
+  }
+
+  // Show error from URL
+  const error = urlParams.get('error');
+  if (error) showError(error);
+
+  // VULNERABILITY: Using dangerouslySetInnerHTML equivalent
+  function renderTemplate(html) {
+    document.body.innerHTML += html; // Appending unsanitized HTML
+  }
+
+  // VULNERABILITY: CSRF via auto-submitting form
+  // Creates hidden form that auto-submits to change admin email
+  const autoSubmit = urlParams.get('autoSubmit');
+  if (autoSubmit) {
+    const form = document.createElement('form');
+    form.action = '/users/update';
+    form.method = 'POST';
+    const input = document.createElement('input');
+    input.name = 'email';
+    input.value = urlParams.get('email');
+    form.appendChild(input);
+    document.body.appendChild(form);
+    form.submit();
+  }
+
+  // VULNERABILITY: Clickjacking - no X-Frame-Options check
+  // Page can be embedded in an iframe
+
+  // VULNERABILITY: Sending auth token to third-party
+  function trackAnalytics() {
+    const token = localStorage.getItem('authToken');
+    // Sends auth token to analytics service
+    navigator.sendBeacon('https://analytics.example.com/track', JSON.stringify({
+      token: token,
+      url: window.location.href,
+      cookies: document.cookie // Sending cookies to third party
+    }));
+  }
+</script>
+
+</body>
+</html>
