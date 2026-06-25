@@ -75,14 +75,7 @@ router.post('/eval', (req, res) => {
 // VULNERABILITY: OS Command Injection
 // CWE-78: OS Command Injection
 // ============================================================
-// router.get('/ping', (req, res) => {
-//   const host = req.query.host;
 
-//   // Payload: host=127.0.0.1; cat /etc/passwd
-//   exec(`ping -c 4 ${host}`, (err, stdout, stderr) => {
-//     res.json({ output: stdout, error: stderr });
-//   });
-// });
 
 router.get('/dig', (req, res) => {
   const domain = req.query.domain;
