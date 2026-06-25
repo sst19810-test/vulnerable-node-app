@@ -10,45 +10,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 
-// ============================================================
-// VULNERABILITY: SQL Injection (second-order)
-// CWE-89: SQL Injection
-// ============================================================
-const mysql = require('mysql2');
-const pool = mysql.createPool({
-  host: 'localhost',
-  user: 'root',
-  password: 'root',
-  database: 'appdb',
-  multipleStatements: true  // Stacked queries enabled
-});
 
-router.get('/products', (req, res) => {
-  const { category, sort, order } = req.query;
-
-  // SQL injection in ORDER BY (not parameterizable)
-  // Payload: sort=name,sleep(5)--
-  const query = `SELECT * FROM products
-                 WHERE category = ?
-                 ORDER BY ${sort} ${order}`;  // sort/order not sanitized
-
-  pool.query(query, [category], (err, results) => {
-    if (err) return res.status(500).json({ error: err.message, query });
-    res.json(results);
-  });
-});
-
-router.get('/products/search', (req, res) => {
-  const q = req.query.q;
-
-  // Blind SQL injection via LIKE
-  const query = `SELECT * FROM products WHERE name LIKE '%${q}%' OR description LIKE '%${q}%'`;
-
-  pool.query(query, (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(results);
-  });
-});
 
 // ============================================================
 // VULNERABILITY: Insecure Cryptography
