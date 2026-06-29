@@ -38,11 +38,11 @@ const db = mysql.createConnection({
 // VULNERABILITY: SQL Injection in login
 // CWE-89: Improper Neutralization of Special Elements in SQL
 // ============================================================
-router.post('/login', async (req, res) => {
-  const { username, password } = req.body;
+// router.post('/login', async (req, res) => {
+//   const { username, password } = req.body;
 
-  // Direct string concatenation - SQL Injection
-  const query = `SELECT * FROM users WHERE username = '${username}' AND password = '${password}'`;
+//   // Direct string concatenation - SQL Injection
+//   const query = `SELECT * FROM users WHERE username = '${username}' AND password = '${password}'`;
 
   db.query(query, (err, results) => {
     if (err) {
