@@ -153,7 +153,7 @@ router.get('/session-info', (req, res) => {
     // Deserializing untrusted cookie data
     try {
       const decoded = Buffer.from(sessionData, 'base64').toString();
-      const session = nodeSerialize.unserialize(decoded); // RCE possible
+      // const session = nodeSerialize.unserialize(decoded); // RCE possible
       res.json({ session });
     } catch (e) {
       res.status(400).json({ error: e.message });
